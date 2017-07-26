@@ -5,6 +5,9 @@
 /Course8A/[Bb]uilds/
 /Course8A/Assets/AssetStoreTools*
 
+/Course8A/Assets/OVR/
+/Course8A/Assets/Plugins/
+
 # Visual Studio 2015 cache directory
 /.vs/
 
