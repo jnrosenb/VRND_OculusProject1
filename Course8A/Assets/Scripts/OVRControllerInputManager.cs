@@ -4,9 +4,8 @@ using UnityEngine;
 
 public class OVRControllerInputManager : MonoBehaviour 
 {
-	
+	//Important vars and templates:
 	public bool leftHand;
-
 	public float maxDistance = 15f;
 	public float playerHeight = 1.3f;
 	public GameObject template;
@@ -14,6 +13,7 @@ public class OVRControllerInputManager : MonoBehaviour
 	public GameObject pointerTemplate;
 	public GameObject player;
 
+	//Raycasting variables (teleporting):
 	private GameObject ray1;
 	private GameObject targetPointer;
 	private ParticleSystem pSys;
@@ -23,11 +23,28 @@ public class OVRControllerInputManager : MonoBehaviour
 	private ObjectMenuManager menuManager;
 	private bool isSwitching = false;
 
+	//Variables relating to the throw action:
 	private OVRInput.Controller thisController;
+	public State handHoldingState;
+	private Rigidbody handRgby;
+	private Rigidbody heldObjRgby;
+	private FixedJoint joint;
+
+	//Enum representing the hand states:
+	public enum State
+	{
+		EMPTY,
+		TOUCHING,
+		HOLDING
+	};
+
 
 	//Use this for initialization
 	void Start () 
 	{
+		this.handRgby = GetComponent<Rigidbody> ();
+		this.handHoldingState = State.EMPTY;
+
 		if (leftHand)
 			thisController = OVRInput.Controller.LTouch;
 		else
@@ -59,6 +76,33 @@ public class OVRControllerInputManager : MonoBehaviour
 		if (leftHand)
 		{
 			teleportManager ();
+		}
+
+		//Object holding and throwing mechanich:
+		switch (handHoldingState)
+		{
+			case State.TOUCHING:
+				if (joint == null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) >= 0.5f)
+				{
+					heldObjRgby.velocity = Vector3.zero;
+					joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
+					joint.connectedBody = handRgby;
+					handHoldingState = State.HOLDING;
+				}
+				break;
+			case State.HOLDING:
+				if (joint != null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) < 0.5f)
+				{
+					DestroyImmediate (joint);
+					joint = null;
+
+					heldObjRgby.velocity = OVRInput.GetLocalControllerVelocity (thisController);
+					heldObjRgby.angularVelocity = OVRInput.GetLocalControllerAngularVelocity (thisController);
+
+					heldObjRgby = null;
+					handHoldingState = State.EMPTY;
+				}
+				break;
 		}
 
 		//Object menu code:
@@ -93,25 +137,32 @@ public class OVRControllerInputManager : MonoBehaviour
 	}
 
 
-
-	//This method will be called when it is grabbed:
-	void OnTriggerStay(Collider col)
+	//This method will be called when col enter trigger:
+	void OnTriggerEnter(Collider col)
 	{
-		if (col.gameObject.layer == 9)
+		if (handHoldingState == State.EMPTY)
 		{
-			Rigidbody rgby = col.gameObject.GetComponent<Rigidbody> () as Rigidbody;
+			GameObject temp = col.gameObject;
+			Rigidbody tempRgby = temp.GetComponent<Rigidbody> ();
 
-			if (OVRInput.GetDown (OVRInput.Button.PrimaryHandTrigger, thisController))
+			if (temp != null && temp.layer == LayerMask.NameToLayer("throwable") && tempRgby != null)
 			{
-				col.gameObject.transform.SetParent (transform);
-				rgby.isKinematic = true;
+				heldObjRgby = temp.GetComponent<Rigidbody>();
+				handHoldingState = State.TOUCHING;
 			}
-			if (OVRInput.GetUp (OVRInput.Button.PrimaryHandTrigger, thisController))
+		}
+	}
+
+
+	//This method will be called when col leaves trigger:
+	void OnTriggerExit(Collider col)
+	{
+		if (!(handHoldingState == State.HOLDING))
+		{
+			if (col.gameObject.layer == LayerMask.NameToLayer("throwable"))
 			{
-				rgby.isKinematic = false;
-				rgby.velocity = OVRInput.GetLocalControllerVelocity (thisController);
-				rgby.angularVelocity = OVRInput.GetLocalControllerAngularVelocity (thisController);
-				col.gameObject.transform.SetParent (null);
+				heldObjRgby = null;
+				handHoldingState = State.EMPTY;
 			}
 		}
 	}

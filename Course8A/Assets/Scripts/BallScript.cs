@@ -9,7 +9,7 @@ public class BallScript: MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
-		transform.position = ballStartingPos;	
+		//transform.position = ballStartingPos;	
 	}
 	
 	// Update is called once per frame
