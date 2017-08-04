@@ -11,13 +11,26 @@ public class Fan : MonoBehaviour {
 	void Start () {
 		
 	}
-	
+
+//	void OnTriggerEnter(Collider col)
+//	{
+//		Physics.gravity /= 4;
+//	}
+
 	void OnTriggerStay(Collider col)
 	{
 		Rigidbody ball = col.gameObject.GetComponent<Rigidbody> ();
 
-		float zDist = Mathf.Abs (col.gameObject.transform.position.z - origin.position.z);
+//		if (Mathf.Abs(ball.velocity.y) <= 50f)
+//		{
+			float zDist = Mathf.Abs (col.gameObject.transform.position.z - origin.position.z);
 
-		ball.AddForce (new Vector3(0f, zDist * fanForce, 0f));
+			ball.AddForce (new Vector3 (0f, zDist * zDist * fanForce, 0f));
+//		}
 	}
+
+//	void OnTriggerExit(Collider col)
+//	{
+//		Physics.gravity *= 4;
+//	}
 }
