@@ -69,6 +69,10 @@ ModelImporter:
     4300002: polySurface13
     4300004: polySurface11
     4300006: polySurface9
+    6400000: polySurface11
+    6400002: polySurface13
+    6400004: polySurface4
+    6400006: polySurface9
     9500000: //RootNode
   materials:
     importMaterials: 1
@@ -113,7 +117,7 @@ ModelImporter:
     useFileScale: 1
   tangentSpace:
     normalSmoothAngle: 60
-    normalImportMode: 0
+    normalImportMode: 1
     tangentImportMode: 3
   importAnimation: 1
   copyAvatar: 0
