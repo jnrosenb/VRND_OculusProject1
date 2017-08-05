@@ -25,7 +25,7 @@ public class Fan : MonoBehaviour {
 //		{
 			float zDist = Mathf.Abs (col.gameObject.transform.position.z - origin.position.z);
 
-			ball.AddForce (new Vector3 (0f, zDist * zDist * fanForce, 0f));
+			ball.AddForce (new Vector3 (0f, zDist * fanForce, 0f));
 //		}
 	}
 

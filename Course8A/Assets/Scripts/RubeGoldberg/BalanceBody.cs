@@ -40,12 +40,31 @@ public class BalanceBody : MonoBehaviour {
 		if (leftTorque > rightTorque && xRotation <= 30f)
 		{
 			//rgbdy.angularVelocity.Set (1f, 0f, 0f);
-			this.gameObject.transform.Rotate (0.1f, 0f, 0f);
+			this.gameObject.transform.Rotate (0.5f, 0f, 0f);
 		}
 		else if (rightTorque > leftTorque && xRotation >= -30f)
 		{
 			//rgbdy.angularVelocity.Set (-1f, 0f, 0f);
-			this.gameObject.transform.Rotate (-0.1f, 0f, 0f);
+			this.gameObject.transform.Rotate (-0.5f, 0f, 0f);
 		}
+
+		if (rightTorque == 0 && leftTorque == 0)
+		{
+			if (xRotation > 0.5f)
+			{
+				transform.Rotate (-0.5f, 0f, 0f);
+			}
+			else if (xRotation < -0.5f)
+			{
+				transform.Rotate (+0.5f, 0f, 0f);
+			}
+			else
+			{
+				transform.rotation = Quaternion.Euler (0f, transform.rotation.eulerAngles.y, transform.rotation.eulerAngles.z);
+			}
+		}
+
+		leftTorque = 0;
+		rightTorque = 0;
 	}
 }

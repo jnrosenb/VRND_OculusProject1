@@ -18,7 +18,7 @@ public class BalanceThing : MonoBehaviour {
 
 			//Contact point z component minus center z component gives the straight distance to the
 			//Center of the balance bar. Negative if it is to the left, positive if to the right.
-			float zDistance = point.z - body.gameObject.transform.position.z;
+			float zDistance = - point.x + body.gameObject.transform.position.x;
 
 			//If its positive, it sums to one side. Otherwise, to the other:
 			if (zDistance > 0)
