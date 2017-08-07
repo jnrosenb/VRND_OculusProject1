@@ -19,12 +19,14 @@ public class BalanceBody : MonoBehaviour {
 	}
 
 	private Rigidbody rgbdy;
+	public int numberElementsOnTop;
 
 
 	// Use this for initialization
 	void Start () 
 	{
 		rgbdy = GetComponent<Rigidbody> ();
+		numberElementsOnTop = 0;
 		rightTorque = 0f;
 		leftTorque = 0f;
 	}
@@ -32,6 +34,8 @@ public class BalanceBody : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
+		Debug.Log ("Number of elements on top: " + numberElementsOnTop);
+
 		//This is just to help me measure the limits of the balance when rotating.
 		float xRotation = this.gameObject.transform.rotation.eulerAngles.x;
 		if (xRotation > 180f)
@@ -48,7 +52,7 @@ public class BalanceBody : MonoBehaviour {
 			this.gameObject.transform.Rotate (-0.5f, 0f, 0f);
 		}
 
-		if (rightTorque == 0 && leftTorque == 0)
+		if (rightTorque == 0 && leftTorque == 0 && numberElementsOnTop == 0)
 		{
 			if (xRotation > 0.5f)
 			{
