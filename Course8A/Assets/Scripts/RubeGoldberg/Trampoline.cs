@@ -10,12 +10,15 @@ public class Trampoline : MonoBehaviour {
 	{
 		foreach (ContactPoint cp in collision.contacts)
 		{
-			//Rigidbody ball = cp.thisCollider.gameObject.GetComponent<Rigidbody> ();
-			Rigidbody ball = cp.otherCollider.gameObject.GetComponent<Rigidbody> ();
+			if (cp.otherCollider.gameObject.tag == "Ball")
+			{
+				//Rigidbody ball = cp.thisCollider.gameObject.GetComponent<Rigidbody> ();
+				Rigidbody ball = cp.otherCollider.gameObject.GetComponent<Rigidbody> ();
 
-			//Vector3 ballDirection = ball.velocity.Normalize ();
+				//Vector3 ballDirection = ball.velocity.Normalize ();
 
-			ball.AddForce (-cp.normal * trampolineForce);
+				ball.AddForce (-cp.normal * trampolineForce);
+			}
 		}
 	}
 }

@@ -15,7 +15,9 @@ public class Teleporter : MonoBehaviour {
 	void OnTriggerEnter(Collider col)
 	{
 		GameObject ball = col.gameObject;
-
-		ball.transform.position = otherPortal.transform.position;  
+		if (ball.tag == "Ball")
+		{
+			ball.transform.position = otherPortal.transform.position;  
+		}
 	}
 }

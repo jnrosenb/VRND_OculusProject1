@@ -23,9 +23,10 @@ public class BallScript: MonoBehaviour {
 	{
 		if (col.collider.gameObject.tag == "ground")
 		{
-			this.GetComponent<Rigidbody> ().velocity = Vector3.zero;
-			this.GetComponent<Rigidbody> ().angularVelocity = Vector3.zero;
+			Rigidbody rgbdy = this.GetComponent<Rigidbody> ();
+			rgbdy.isKinematic = true;
 			this.transform.position = ballStartingPos;
+			rgbdy.isKinematic = false;
 		}
 	}
 }

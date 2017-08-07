@@ -34,8 +34,6 @@ public class BalanceBody : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		Debug.Log ("Number of elements on top: " + numberElementsOnTop);
-
 		//This is just to help me measure the limits of the balance when rotating.
 		float xRotation = this.gameObject.transform.rotation.eulerAngles.x;
 		if (xRotation > 180f)

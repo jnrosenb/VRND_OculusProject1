@@ -6,27 +6,48 @@ public class ObjectMenuManager : MonoBehaviour
 {
 
 	public GameObject[] objectsTemplates;
-
 	private GameObject[] realObjects;
+
+	private GameObject[] displayObjects;
 	private GameObject selected;
 	private int index = 0;
 	private int maxIndex;
+	private bool[] usedIndexes;
+
 
 	// Use this for initialization
 	void Start () 
 	{
 		maxIndex = objectsTemplates.Length - 1;
-		realObjects = new GameObject[maxIndex + 1];
+		displayObjects = new GameObject[maxIndex + 1];
+		usedIndexes = new bool[maxIndex + 1];
 
 		if (maxIndex > 0)
 		{
 			for (int i = 0; i < maxIndex + 1; i++)
+				usedIndexes [i] = false;
+
+			for (int i = 0; i < maxIndex + 1; i++)
 			{
-				realObjects [i] = GameObject.Instantiate (objectsTemplates[i]);
-				realObjects [i].SetActive (false);
+				GameObject displayObj = transform.GetChild (i).gameObject;
+				displayObjects [i] = displayObj;
+				displayObjects [i].SetActive (false);
 			}
 
-			selected = realObjects [index];
+			selected = displayObjects [index];
+		}
+	}
+
+
+	//Creates the currently selected item:
+	public void createObject()
+	{
+		if (!usedIndexes [index])
+		{
+			GameObject obj = GameObject.Instantiate (objectsTemplates[index]);
+			obj.transform.position = selected.transform.position;
+
+			usedIndexes [index] = true;
 		}
 	}
 
@@ -39,10 +60,10 @@ public class ObjectMenuManager : MonoBehaviour
 		if (index >= maxIndex)
 		{
 			index = 0;
-			selected = realObjects [index];
+			selected = displayObjects [index];
 		}
 		else
-			selected = realObjects [++index];
+			selected = displayObjects [++index];
 	}
 
 
@@ -54,10 +75,10 @@ public class ObjectMenuManager : MonoBehaviour
 		if (index <= 0)
 		{
 			index = maxIndex;
-			selected = realObjects [index];
+			selected = displayObjects [index];
 		}
 		else
-			selected = realObjects [--index];
+			selected = displayObjects [--index];
 	}
 
 
@@ -66,7 +87,7 @@ public class ObjectMenuManager : MonoBehaviour
 	{
 		Transform controller = gameObject.transform.parent;
 		selected.transform.position = controller.position + 1f * controller.forward + 0.2f * controller.up; 
-		//selected.transform.rotation = Quaternion.Euler(0f, controller.rotation.eulerAngles.y, 0f);
+		selected.transform.rotation = Quaternion.Euler(0f, controller.rotation.eulerAngles.y, 0f);
 
 		selected.SetActive (true);
 	}

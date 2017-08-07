@@ -108,12 +108,16 @@ public class OVRControllerInputManager : MonoBehaviour
 		//Object menu code:
 		if (!leftHand)
 		{
-			//Menu manager on/off mechanic:
+			//Menu manager on/off mechanic://
 			if (OVRInput.Get (OVRInput.Button.PrimaryIndexTrigger, thisController))
+			{
+				menuManager.createObject();
+			}
+			if (OVRInput.Get (OVRInput.Touch.PrimaryIndexTrigger, thisController))
 			{
 				menuManager.turnOn();
 			}
-			if (OVRInput.GetUp (OVRInput.Button.PrimaryIndexTrigger, thisController))
+			if (OVRInput.GetUp (OVRInput.Touch.PrimaryIndexTrigger, thisController))
 			{
 				menuManager.turnOff();
 			}
