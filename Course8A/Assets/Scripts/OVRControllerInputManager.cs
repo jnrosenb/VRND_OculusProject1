@@ -53,10 +53,10 @@ public class OVRControllerInputManager : MonoBehaviour
 		if (leftHand)
 		{
 			ray1 = GameObject.Instantiate (template);
-			pSys = GameObject.Instantiate (particleTemplate).GetComponent<ParticleSystem>() as ParticleSystem;
+			//pSys = GameObject.Instantiate (particleTemplate).GetComponent<ParticleSystem>() as ParticleSystem;
 			line1 = ray1.GetComponent<LineRenderer> () as LineRenderer;
 			ray1.SetActive (false);
-			pSys.gameObject.SetActive (false);
+			//pSys.gameObject.SetActive (false);
 
 			targetPointer = GameObject.Instantiate (pointerTemplate);
 			targetPointer.SetActive (false);

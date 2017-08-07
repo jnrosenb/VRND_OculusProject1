@@ -23,6 +23,7 @@ public class ObjectMenuManager : MonoBehaviour
 			for (int i = 0; i < maxIndex + 1; i++)
 			{
 				realObjects [i] = GameObject.Instantiate (objectsTemplates[i]);
+				realObjects [i].SetActive (false);
 			}
 
 			selected = realObjects [index];
@@ -64,8 +65,8 @@ public class ObjectMenuManager : MonoBehaviour
 	public void turnOn()
 	{
 		Transform controller = gameObject.transform.parent;
-		selected.transform.position = controller.position + 2f * controller.forward + 1f * controller.up; 
-		selected.transform.rotation = Quaternion.Euler(0f, controller.rotation.eulerAngles.y, 0f);
+		selected.transform.position = controller.position + 1f * controller.forward + 0.2f * controller.up; 
+		//selected.transform.rotation = Quaternion.Euler(0f, controller.rotation.eulerAngles.y, 0f);
 
 		selected.SetActive (true);
 	}
