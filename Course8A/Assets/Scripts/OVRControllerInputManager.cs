@@ -8,20 +8,31 @@ public class OVRControllerInputManager : MonoBehaviour
 	public bool leftHand;
 	public float maxDistance = 15f;
 	public float playerHeight = 1.3f;
-	public GameObject template;
-	public GameObject particleTemplate;
-	public GameObject pointerTemplate;
+	public GameObject pointerTemplate1;
+	public GameObject[] pointerTemplate2;
+	public GameObject rayTemplate1;
+	public GameObject rayTemplate2;
 	public GameObject player;
+	//public GameObject particleTemplate;
 
 	//Raycasting variables (teleporting):
 	private GameObject ray1;
 	private GameObject targetPointer;
-	private ParticleSystem pSys;
 	private LineRenderer line1;
 	private Vector3 rayTarget;
 	private Vector3 teleportationPos;
-	private ObjectMenuManager menuManager;
+	//private ParticleSystem pSys;
+
+	//MenuManager Variables:
 	private bool isSwitching = false;
+	private bool inSpawnProcess = false;
+	private ObjectMenuManager menuManager;
+	private GameObject ray2;
+	private GameObject[] pointers2;
+	private GameObject targetPointer2;
+	private LineRenderer line2;
+	private Vector3 rayTarget2;
+	private Vector3 newObjPosition;
 
 	//Variables relating to the throw action:
 	private OVRInput.Controller thisController;
@@ -29,6 +40,7 @@ public class OVRControllerInputManager : MonoBehaviour
 	private Rigidbody handRgby;
 	private Rigidbody heldObjRgby;
 	private FixedJoint joint;
+	private bool isStructure;
 
 	//Enum representing the hand states:
 	public enum State
@@ -52,19 +64,34 @@ public class OVRControllerInputManager : MonoBehaviour
 
 		if (leftHand)
 		{
-			ray1 = GameObject.Instantiate (template);
+			ray1 = GameObject.Instantiate (rayTemplate1);
 			//pSys = GameObject.Instantiate (particleTemplate).GetComponent<ParticleSystem>() as ParticleSystem;
 			line1 = ray1.GetComponent<LineRenderer> () as LineRenderer;
 			ray1.SetActive (false);
 			//pSys.gameObject.SetActive (false);
 
-			targetPointer = GameObject.Instantiate (pointerTemplate);
+			targetPointer = GameObject.Instantiate (pointerTemplate1);
 			targetPointer.SetActive (false);
 		}
 
 		if (!leftHand)
 		{
 			menuManager = GetComponentInChildren<ObjectMenuManager> () as ObjectMenuManager;
+			ray2 = GameObject.Instantiate (rayTemplate2);
+			line2 = ray2.GetComponent<LineRenderer> () as LineRenderer;
+			ray2.SetActive (false);
+
+			//Replace the hardcoded number for a variable later:
+			pointers2 = new GameObject[7];
+			for (int i = 0; i < 7; i++)
+			{
+				GameObject pointer = GameObject.Instantiate (pointerTemplate2[i]);
+				pointer.SetActive (false);
+				pointers2 [i] = pointer;
+			}
+			targetPointer2 = pointers2 [0];
+
+			targetPointer2.SetActive (false);
 		}
 	}
 
@@ -84,23 +111,43 @@ public class OVRControllerInputManager : MonoBehaviour
 			case State.TOUCHING:
 				if (joint == null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) >= 0.5f)
 				{
-					heldObjRgby.velocity = Vector3.zero;
-					joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
-					joint.connectedBody = handRgby;
-					handHoldingState = State.HOLDING;
+					if (isStructure)
+					{
+						joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
+						joint.connectedBody = handRgby;
+						handHoldingState = State.HOLDING;
+					}
+					else
+					{
+						heldObjRgby.velocity = Vector3.zero;
+						joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
+						joint.connectedBody = handRgby;
+						handHoldingState = State.HOLDING;
+					}
 				}
 				break;
 			case State.HOLDING:
 				if (joint != null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) < 0.5f)
 				{
-					DestroyImmediate (joint);
-					joint = null;
+					if (isStructure)
+					{
+						DestroyImmediate (joint);
+						joint = null;
 
-					heldObjRgby.velocity = OVRInput.GetLocalControllerVelocity (thisController);
-					heldObjRgby.angularVelocity = OVRInput.GetLocalControllerAngularVelocity (thisController);
+						heldObjRgby = null;
+						handHoldingState = State.EMPTY;
+					}
+					else
+					{
+						DestroyImmediate (joint);
+						joint = null;
 
-					heldObjRgby = null;
-					handHoldingState = State.EMPTY;
+						heldObjRgby.velocity = OVRInput.GetLocalControllerVelocity (thisController);
+						heldObjRgby.angularVelocity = OVRInput.GetLocalControllerAngularVelocity (thisController);
+
+						heldObjRgby = null;
+						handHoldingState = State.EMPTY;
+					}
 				}
 				break;
 		}
@@ -108,16 +155,53 @@ public class OVRControllerInputManager : MonoBehaviour
 		//Object menu code:
 		if (!leftHand)
 		{
-			//Menu manager on/off mechanic://
+			//When button is pressed, interface for positioning item shows. When released, item is created:
 			if (OVRInput.Get (OVRInput.Button.PrimaryIndexTrigger, thisController))
 			{
-				menuManager.createObject();
+				ray2.SetActive (true);
+				inSpawnProcess = true;
+				menuManager.turnOff();
+
+				RaycastHit hit;
+				if (Physics.Raycast (transform.position, transform.forward, out hit, maxDistance, 256))
+				{
+					line2.SetPosition (0, transform.position);
+					line2.SetPosition (1, hit.point);
+					newObjPosition = hit.point;
+					targetPointer2.transform.position = new Vector3(newObjPosition.x, 0f, newObjPosition.z);
+					targetPointer2.SetActive (true);
+				}
+				else
+				{
+					rayTarget2 = transform.position + maxDistance * transform.forward;
+					RaycastHit hitGround;
+					if (Physics.Raycast (rayTarget2, Vector3.down, out hitGround, 100 * maxDistance, 256))
+					{
+						line2.SetPosition (0, transform.position);
+						line2.SetPosition (1, rayTarget2);
+						ray2.SetActive (true);
+
+						newObjPosition = hitGround.point;
+						targetPointer2.transform.position =  new Vector3(newObjPosition.x, 0f, newObjPosition.z);;
+						targetPointer2.SetActive (true);
+					}
+				}
 			}
-			if (OVRInput.Get (OVRInput.Touch.PrimaryIndexTrigger, thisController))
+			if (OVRInput.GetUp (OVRInput.Button.PrimaryIndexTrigger, thisController))
+			{
+				targetPointer2.SetActive (false);
+				ray2.SetActive (false);
+				targetPointer2.SetActive (false);
+				menuManager.createObject( new Vector3(newObjPosition.x, 0f, newObjPosition.z), targetPointer2.transform.rotation);
+				inSpawnProcess = false;
+			}
+
+			//Menu manager on/off mechanic. It will only turn it on if not in spawnProcess:
+			if (OVRInput.Get (OVRInput.Touch.PrimaryThumbstick, thisController) && !inSpawnProcess)
 			{
 				menuManager.turnOn();
 			}
-			if (OVRInput.GetUp (OVRInput.Touch.PrimaryIndexTrigger, thisController))
+			if (OVRInput.GetUp (OVRInput.Touch.PrimaryThumbstick, thisController))
 			{
 				menuManager.turnOff();
 			}
@@ -125,13 +209,35 @@ public class OVRControllerInputManager : MonoBehaviour
 			//Menu manager item switching:
 			if (OVRInput.Get (OVRInput.Axis2D.PrimaryThumbstick, thisController).x >= 0.25f && !isSwitching)
 			{
-				menuManager.shiftRight();
-				isSwitching = true;
+				//If in spawn process, pointer will be visible:
+				if (inSpawnProcess)
+				{
+					targetPointer2.SetActive (true);
+					targetPointer2.transform.Rotate (new Vector3 (0f, OVRInput.Get (OVRInput.Axis2D.PrimaryThumbstick, thisController).x, 0f), Space.Self);
+				}
+				else
+				{
+					targetPointer2.SetActive (false);
+					menuManager.shiftRight ();
+					isSwitching = true;
+					targetPointer2 = pointers2 [menuManager.index];
+				}
 			}
 			if (OVRInput.Get (OVRInput.Axis2D.PrimaryThumbstick, thisController).x <= -0.25f && !isSwitching)
 			{
-				menuManager.shiftLeft();
-				isSwitching = true;
+				//If in spawn process, pointer will be visible:
+				if (inSpawnProcess)
+				{
+					targetPointer2.SetActive (true);
+					targetPointer2.transform.Rotate (new Vector3 (0f, OVRInput.Get (OVRInput.Axis2D.PrimaryThumbstick, thisController).x, 0f), Space.Self);
+				}
+				else
+				{
+					targetPointer2.SetActive (false);
+					menuManager.shiftLeft ();
+					isSwitching = true;
+					targetPointer2 = pointers2 [menuManager.index];
+				}
 			}
 			if (OVRInput.Get (OVRInput.Axis2D.PrimaryThumbstick, thisController).x > -0.25f && OVRInput.Get (OVRInput.Axis2D.PrimaryThumbstick, thisController).x < 0.25f)
 			{
@@ -154,6 +260,12 @@ public class OVRControllerInputManager : MonoBehaviour
 				heldObjRgby = temp.GetComponent<Rigidbody>();
 				handHoldingState = State.TOUCHING;
 			}
+			else if (temp != null && temp.tag == "Structure" && tempRgby != null)
+			{
+				heldObjRgby = temp.GetComponent<Rigidbody>();
+				handHoldingState = State.TOUCHING;
+				isStructure = true;
+			}
 		}
 	}
 
@@ -167,6 +279,12 @@ public class OVRControllerInputManager : MonoBehaviour
 			{
 				heldObjRgby = null;
 				handHoldingState = State.EMPTY;
+			}
+			else if (col.gameObject.tag == "Structure")
+			{
+				heldObjRgby = null;
+				handHoldingState = State.EMPTY;
+				isStructure = false;
 			}
 		}
 	}

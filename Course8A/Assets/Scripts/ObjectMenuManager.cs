@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class ObjectMenuManager : MonoBehaviour 
 {
-
+	//Templates:
 	public GameObject[] objectsTemplates;
 	private GameObject[] realObjects;
 
+	//Other vars:
 	private GameObject[] displayObjects;
 	private GameObject selected;
-	private int index = 0;
+	public int index = 0;
 	private int maxIndex;
 	private bool[] usedIndexes;
 
@@ -40,12 +41,14 @@ public class ObjectMenuManager : MonoBehaviour
 
 
 	//Creates the currently selected item:
-	public void createObject()
+	public void createObject(Vector3 newObjPos, Quaternion rotation)
 	{
 		if (!usedIndexes [index])
 		{
+			Transform controller = gameObject.transform.parent;
 			GameObject obj = GameObject.Instantiate (objectsTemplates[index]);
-			obj.transform.position = selected.transform.position;
+			obj.transform.position = newObjPos;
+			obj.transform.rotation = rotation;
 
 			usedIndexes [index] = true;
 		}
