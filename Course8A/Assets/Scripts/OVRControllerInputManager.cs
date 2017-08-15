@@ -108,48 +108,38 @@ public class OVRControllerInputManager : MonoBehaviour
 		//Object holding and throwing mechanich:
 		switch (handHoldingState)
 		{
-			case State.TOUCHING:
-				if (joint == null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) >= 0.5f)
-				{
-					if (isStructure)
-					{
-						joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
-						joint.connectedBody = handRgby;
-						handHoldingState = State.HOLDING;
-					}
-					else
+		case State.TOUCHING:
+			if (joint == null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) >= 0.5f)
+			{
+					if (!isStructure)
 					{
 						heldObjRgby.velocity = Vector3.zero;
 						joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
 						joint.connectedBody = handRgby;
 						handHoldingState = State.HOLDING;
 					}
-				}
-				break;
-			case State.HOLDING:
-				if (joint != null && OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) < 0.5f)
-				{
-					if (isStructure)
-					{
-						DestroyImmediate (joint);
-						joint = null;
-
-						heldObjRgby = null;
-						handHoldingState = State.EMPTY;
-					}
 					else
 					{
-						DestroyImmediate (joint);
-						joint = null;
-
-						heldObjRgby.velocity = OVRInput.GetLocalControllerVelocity (thisController);
-						heldObjRgby.angularVelocity = OVRInput.GetLocalControllerAngularVelocity (thisController);
-
-						heldObjRgby = null;
-						handHoldingState = State.EMPTY;
+						joint = heldObjRgby.gameObject.AddComponent<FixedJoint> () as FixedJoint;
+						heldObjRgby.gameObject.transform.SetParent (this.transform);
+						handHoldingState = State.HOLDING;
 					}
-				}
-				break;
+			}
+			break;
+		case State.HOLDING:
+			if (OVRInput.Get (OVRInput.Axis1D.PrimaryHandTrigger, thisController) < 0.5f && joint != null )
+			{
+				DestroyImmediate (joint);
+				joint = null;
+
+				heldObjRgby.velocity = OVRInput.GetLocalControllerVelocity (thisController);
+				heldObjRgby.angularVelocity = OVRInput.GetLocalControllerAngularVelocity (thisController);
+
+				heldObjRgby.gameObject.transform.SetParent (null);
+				heldObjRgby = null;
+				handHoldingState = State.EMPTY;
+			}
+			break;
 		}
 
 		//Object menu code:
@@ -284,8 +274,8 @@ public class OVRControllerInputManager : MonoBehaviour
 			{
 				heldObjRgby = null;
 				handHoldingState = State.EMPTY;
-				isStructure = false;
 			}
+			isStructure = false;
 		}
 	}
 

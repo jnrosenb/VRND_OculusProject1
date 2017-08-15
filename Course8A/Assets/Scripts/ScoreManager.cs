@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScoreManager : MonoBehaviour {
+public static class ScoreManager
+{
+	public static int maxNumberOfEach = 3;
+	public static bool pausedGame = false;
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+	public static int starsCollected = 0;
 }
